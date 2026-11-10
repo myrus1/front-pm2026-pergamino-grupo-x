@@ -101,9 +101,9 @@ export function AdminCoursesPage() {
                 <th>Especialidad</th>
                 <th>Instructor</th>
                 <th>Fechas</th>
-                <th>Precio base</th>
+                <th className="cell-number">Precio base</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th className="cell-actions">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -115,14 +115,14 @@ export function AdminCoursesPage() {
                   <td>
                     {formatDate(course.startDate)} – {formatDate(course.endDate)}
                   </td>
-                  <td>{formatCurrency(course.basePrice)}</td>
+                  <td className="cell-number">{formatCurrency(course.basePrice)}</td>
                   <td>
                     <CourseStatusBadge status={course.status} />
                   </td>
                   <td>
                     <button
                       type="button"
-                      className="button button--danger button--small"
+                      className="button button--danger-quiet button--small"
                       onClick={() => setCourseToDelete(course)}
                     >
                       Eliminar

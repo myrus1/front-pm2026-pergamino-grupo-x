@@ -72,10 +72,13 @@ export function CatalogPage() {
           <h1>Catálogo de cursos</h1>
           <p className="muted">Cursos publicados disponibles para inscribirse.</p>
         </div>
+        <span className="count-pill">
+          {visibleCourses.length} {visibleCourses.length === 1 ? 'curso' : 'cursos'}
+        </span>
       </header>
 
       <div className="filters">
-        <label className="field field--inline">
+        <label className="field">
           <span className="field__label">Buscar por título</span>
           <input
             type="search"
@@ -84,7 +87,7 @@ export function CatalogPage() {
             placeholder="Ej. React avanzado"
           />
         </label>
-        <label className="field field--inline">
+        <label className="field">
           <span className="field__label">Especialidad</span>
           <select value={specialtyId} onChange={(event) => setSpecialtyId(event.target.value)}>
             <option value="">Todas</option>
@@ -106,9 +109,19 @@ export function CatalogPage() {
             const spots = Math.max(course.maxCapacity - count, 0)
             const started = isTodayOrPast(course.startDate)
             return (
-              <article key={course.id} className="course-card">
+              <Link
+                key={course.id}
+                className="course-card"
+                to={`/student/courses/${course.id}`}
+                aria-label={`Ver detalle de ${course.title}`}
+              >
                 <div className="course-card__top">
-                  <span className="tag">{specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad'}</span>
+                  <span
+                    className="tag"
+                    title={specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad'}
+                  >
+                    {specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad'}
+                  </span>
                   <span className={`badge ${spots === 0 || started ? 'badge--muted' : 'badge--success'}`}>
                     {started ? 'Comenzado' : spots === 0 ? 'Sin cupo' : `${spots} cupos`}
                   </span>
@@ -117,16 +130,14 @@ export function CatalogPage() {
                 <p className="course-card__instructor">
                   Instructor: {instructorMap.get(course.instructorId ?? 0) ?? '—'}
                 </p>
-                <p className="muted">
-                  {formatDate(course.startDate)} al {formatDate(course.endDate)}
+                <p className="muted course-card__date">
+                  {formatDate(course.startDate)} – {formatDate(course.endDate)}
                 </p>
                 <div className="course-card__footer">
                   <strong>{formatCurrency(course.basePrice)}</strong>
-                  <Link className="button button--primary button--small" to={`/student/courses/${course.id}`}>
-                    Ver detalle
-                  </Link>
+                  <span className="course-card__cta">Ver detalle</span>
                 </div>
-              </article>
+              </Link>
             )
           })}
         </div>

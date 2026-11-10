@@ -40,8 +40,16 @@ export function Layout() {
     <div className="app-shell">
       <header className="navbar">
         <div className="navbar__inner">
-          <NavLink to="/" className="brand">
-            Edu<span>Platform</span>
+          <a className="skip-link" href="#main-content">
+            Saltar al contenido
+          </a>
+          <NavLink to="/" className="brand" aria-label="EduPlatform">
+            <span className="brand__mark" aria-hidden="true">
+              E
+            </span>
+            <span className="brand__name">
+              Edu<span>Platform</span>
+            </span>
           </NavLink>
 
           {user && (
@@ -72,7 +80,7 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="page">
+      <main className="page" id="main-content" tabIndex={-1}>
         <Outlet />
       </main>
     </div>

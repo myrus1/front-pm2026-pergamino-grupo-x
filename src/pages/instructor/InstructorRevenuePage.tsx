@@ -42,6 +42,8 @@ export function InstructorRevenuePage() {
       .sort((first, second) => second.estimated - first.estimated)
   }, [resource.data, user])
 
+  const totalEnrollments = breakdown.reduce((sum, item) => sum + item.count, 0)
+
   if (resource.loading) {
     return <LoadingState message="Cargando recaudación…" />
   }
@@ -59,11 +61,21 @@ export function InstructorRevenuePage() {
         </div>
       </header>
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <span className="stat-card__label">Total recaudado</span>
-          <strong className="stat-card__value">{formatCurrency(resource.data.revenue.total)}</strong>
-          <span className="muted">Valor informado por el backend.</span>
+      <div className="summary">
+        <div className="summary__item">
+          <span className="summary__label">Total recaudado</span>
+          <strong className="summary__value">{formatCurrency(resource.data.revenue.total)}</strong>
+          <span className="summary__hint">Valor informado por el backend.</span>
+        </div>
+        <div className="summary__item">
+          <span className="summary__label">Cursos</span>
+          <strong className="summary__value">{breakdown.length}</strong>
+          <span className="summary__hint">Cursos con recaudación estimada.</span>
+        </div>
+        <div className="summary__item">
+          <span className="summary__label">Inscriptos</span>
+          <strong className="summary__value">{totalEnrollments}</strong>
+          <span className="summary__hint">Inscripciones en tus cursos.</span>
         </div>
       </div>
 
@@ -76,16 +88,16 @@ export function InstructorRevenuePage() {
             <thead>
               <tr>
                 <th>Curso</th>
-                <th>Inscriptos</th>
-                <th>Recaudación estimada</th>
+                <th className="cell-number">Inscriptos</th>
+                <th className="cell-number">Recaudación estimada</th>
               </tr>
             </thead>
             <tbody>
               {breakdown.map((item) => (
                 <tr key={item.course.id}>
                   <td>{item.course.title}</td>
-                  <td>{item.count}</td>
-                  <td>{formatCurrency(item.estimated)}</td>
+                  <td className="cell-number">{item.count}</td>
+                  <td className="cell-number">{formatCurrency(item.estimated)}</td>
                 </tr>
               ))}
             </tbody>

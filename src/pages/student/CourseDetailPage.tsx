@@ -115,8 +115,9 @@ export function CourseDetailPage() {
             <h1>{course.title}</h1>
             <CourseStatusBadge status={course.status} />
           </div>
-          <p className="muted">
-            {specialty?.name ?? 'Sin especialidad'} · Instructor: {instructor ? fullName(instructor) : '—'}
+          <p className="detail-meta">
+            <span className="tag">{specialty?.name ?? 'Sin especialidad'}</span>
+            <span>Instructor: {instructor ? fullName(instructor) : '—'}</span>
           </p>
 
           <p className="description">{course.description || 'Sin descripción.'}</p>

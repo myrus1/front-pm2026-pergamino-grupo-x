@@ -43,7 +43,7 @@ export function LoginPage() {
 
         <form className="form" onSubmit={handleSubmit}>
           <label className="field">
-            <span className="field__label">Email</span>
+            <span className="field__label">Correo electrónico</span>
             <input
               type="email"
               value={email}

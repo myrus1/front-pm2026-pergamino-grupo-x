@@ -4,6 +4,8 @@ dist
 .gitignore
 .vscode
 .idea
+.agents
+skills-lock.json
 *.log
 .env
 .env.*

@@ -74,7 +74,7 @@ export function CourseStudentsPage() {
                 <th>Nombre</th>
                 <th>Apellido</th>
                 <th>DNI</th>
-                <th>Email</th>
+                <th>Correo electrónico</th>
                 <th>Fecha de inscripción</th>
               </tr>
             </thead>
