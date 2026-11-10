@@ -25,6 +25,78 @@ npm run preview   # sirve el build (con el mismo proxy)
 npm run lint      # oxlint
 ```
 
+## Docker
+
+La imagen es multi-stage (build con Node, runtime con nginx). nginx sirve la SPA y proxya
+`/api` al backend, por lo que no hace falta CORS.
+
+Requisitos: Docker instalado y el backend Spring corriendo en el puerto `8080`.
+
+### 1. Construir la imagen
+
+```bash
+docker build -t elearning-front .
+```
+
+### 2. Ejecutar el contenedor
+
+**Linux** (el backend corre en el host):
+
+```bash
+docker run -d --name elearning-front \
+  -p 8081:80 \
+  --add-host=host.docker.internal:host-gateway \
+  -e API_UPSTREAM=http://host.docker.internal:8080 \
+  elearning-front
+```
+
+**macOS / Windows con Docker Desktop** (`host.docker.internal` ya resuelve al host):
+
+```bash
+docker run -d --name elearning-front \
+  -p 8081:80 \
+  -e API_UPSTREAM=http://host.docker.internal:8080 \
+  elearning-front
+```
+
+**Linux alternativo con red del host**:
+
+```bash
+docker run -d --name elearning-front \
+  --network host \
+  -e API_UPSTREAM=http://localhost:8080 \
+  elearning-front
+```
+
+La app queda disponible en `http://localhost:8081`. Se usa `8081` para no chocar con el
+backend en `8080`; podés cambiarlo con `-p <puerto>:80`.
+
+### 3. Verificar y administrar
+
+```bash
+docker ps                                  # ver el contenedor y su estado de salud
+docker logs -f elearning-front             # logs de nginx
+curl http://localhost:8081/                # SPA (HTML)
+curl http://localhost:8081/api/courses     # proxy hacia el backend
+docker stop elearning-front                # detener
+docker rm elearning-front                  # eliminar
+```
+
+Si el backend está en otro host o puerto, cambiá `API_UPSTREAM`, por ejemplo:
+
+```bash
+docker run -d --name elearning-front -p 8081:80 \
+  -e API_UPSTREAM=http://192.168.1.50:8080 \
+  elearning-front
+```
+
+### Variables
+
+| Variable | Default | Descripción |
+| --- | --- | --- |
+| `API_UPSTREAM` | `http://host.docker.internal:8080` | Origen del backend para el proxy `/api`. Se resuelve al iniciar el contenedor. |
+| `VITE_API_URL` | `/api` | Se puede sobreescribir en build con `--build-arg VITE_API_URL=...`; si se usa una URL absoluta, el backend debe habilitar CORS. |
+
 ## Variables de entorno
 
 Copiá `.env.example` a `.env` si necesitás cambiar valores:
