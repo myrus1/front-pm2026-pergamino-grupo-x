@@ -26,7 +26,28 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="toast-stack" role="status" aria-live="polite">
         {toasts.map((toast) => (
           <div key={toast.id} className={`toast toast--${toast.type}`}>
-            {toast.message}
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              {toast.type === 'success' ? (
+                <path d="m5 12.5 4 4 10-10" />
+              ) : (
+                <>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 8v5" />
+                  <path d="M12 16.5h.01" />
+                </>
+              )}
+            </svg>
+            <span>{toast.message}</span>
           </div>
         ))}
       </div>

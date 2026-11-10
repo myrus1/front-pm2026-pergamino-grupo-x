@@ -26,11 +26,16 @@ export function AdminRevenuePage() {
         </div>
       </header>
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <span className="stat-card__label">Total recaudado</span>
-          <strong className="stat-card__value">{formatCurrency(resource.data.total)}</strong>
-          <span className="muted">{resource.data.count} inscripciones registradas.</span>
+      <div className="summary">
+        <div className="summary__item">
+          <span className="summary__label">Total recaudado</span>
+          <strong className="summary__value">{formatCurrency(resource.data.total)}</strong>
+          <span className="summary__hint">Monto informado por el backend.</span>
+        </div>
+        <div className="summary__item">
+          <span className="summary__label">Inscripciones</span>
+          <strong className="summary__value">{resource.data.count}</strong>
+          <span className="summary__hint">Inscripciones registradas en la plataforma.</span>
         </div>
       </div>
 

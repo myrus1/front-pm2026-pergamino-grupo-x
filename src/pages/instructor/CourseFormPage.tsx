@@ -115,7 +115,7 @@ function CourseForm({ specialties, initial }: CourseFormProps) {
   }
 
   return (
-    <form className="panel form" onSubmit={handleSubmit}>
+    <form className="panel form form--narrow" onSubmit={handleSubmit}>
       <label className="field">
         <span className="field__label">Título</span>
         <input value={form.title} onChange={(event) => updateField('title', event.target.value)} required />

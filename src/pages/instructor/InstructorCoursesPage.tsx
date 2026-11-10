@@ -86,7 +86,7 @@ export function InstructorCoursesPage() {
           <p className="muted">Solo podés editar o eliminar cursos en borrador.</p>
         </div>
         <Link className="button button--primary" to="/instructor/courses/new">
-          + Nuevo curso
+          Crear curso
         </Link>
       </header>
 
@@ -100,10 +100,10 @@ export function InstructorCoursesPage() {
                 <th>Curso</th>
                 <th>Especialidad</th>
                 <th>Fechas</th>
-                <th>Cupo</th>
-                <th>Precio base</th>
+                <th className="cell-number">Cupo</th>
+                <th className="cell-number">Precio base</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th className="cell-actions">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -114,8 +114,8 @@ export function InstructorCoursesPage() {
                   <td>
                     {formatDate(course.startDate)} – {formatDate(course.endDate)}
                   </td>
-                  <td>{course.maxCapacity}</td>
-                  <td>{formatCurrency(course.basePrice)}</td>
+                  <td className="cell-number">{course.maxCapacity}</td>
+                  <td className="cell-number">{formatCurrency(course.basePrice)}</td>
                   <td>
                     <CourseStatusBadge status={course.status} />
                   </td>
@@ -125,7 +125,7 @@ export function InstructorCoursesPage() {
                         className="button button--ghost button--small"
                         to={`/instructor/courses/${course.id}/students`}
                       >
-                        Inscriptos
+                        Ver inscriptos
                       </Link>
                       {course.status === 'DRAFT' && (
                         <>
@@ -144,7 +144,7 @@ export function InstructorCoursesPage() {
                           </button>
                           <button
                             type="button"
-                            className="button button--danger button--small"
+                            className="button button--danger-quiet button--small"
                             onClick={() => setCourseToDelete(course)}
                           >
                             Eliminar

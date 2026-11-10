@@ -59,7 +59,7 @@ export function MyCoursesPage() {
               <tr>
                 <th>Curso</th>
                 <th>Fecha de inscripción</th>
-                <th>Precio final abonado</th>
+                <th className="cell-number">Precio final abonado</th>
               </tr>
             </thead>
             <tbody>
@@ -75,7 +75,7 @@ export function MyCoursesPage() {
                       )}
                     </td>
                     <td>{formatDateTime(enrollment.enrollmentDate)}</td>
-                    <td>{formatCurrency(enrollment.finalAmount)}</td>
+                    <td className="cell-number">{formatCurrency(enrollment.finalAmount)}</td>
                   </tr>
                 )
               })}

@@ -94,7 +94,7 @@ export function AdminAdministratorsPage() {
         </div>
         <div className="form-row">
           <label className="field">
-            <span className="field__label">Email</span>
+            <span className="field__label">Correo electrónico</span>
             <input
               type="email"
               value={form.email}
@@ -132,7 +132,7 @@ export function AdminAdministratorsPage() {
             <thead>
               <tr>
                 <th>Nombre</th>
-                <th>Email</th>
+                <th>Correo electrónico</th>
               </tr>
             </thead>
             <tbody>
