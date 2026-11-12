@@ -105,13 +105,18 @@ inyecta en `PORT`.
 
 1. Conectá el repositorio y desplegá la rama `main`.
 2. En **Settings → Build**, verificá que el builder sea **Dockerfile**.
-3. En **Variables** del servicio del front agregá:
+3. En **Variables** del servicio del front agregá `API_UPSTREAM`, según cómo expongas el backend:
 
    ```
+   # Red privada (recomendado si el backend está en el mismo proyecto/environment)
+   API_UPSTREAM=http://<servicio-backend>.railway.internal:<puerto>
+
+   # Red pública
    API_UPSTREAM=https://<url-publica-del-backend>
    ```
 
-   Sin `/api` al final: nginx conserva el path original (`/api/...`).
+   Siempre con esquema (`http://` o `https://`) y sin `/api` al final: nginx conserva el
+   path original (`/api/...`).
 
 No hace falta definir `VITE_API_URL` en Railway: el build ya usa `/api` por defecto, de modo
 que el navegador pega contra el mismo origen y nginx hace el proxy al backend.

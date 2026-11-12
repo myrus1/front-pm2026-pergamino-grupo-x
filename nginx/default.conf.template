@@ -6,16 +6,18 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
-    # DNS interno de Docker/Railway. Con proxy_pass usando variable, el host se
-    # resuelve en tiempo de request y el contenedor no muere si el upstream no existe.
-    resolver 127.0.0.11 valid=30s ipv6=off;
+    # DNS real del contenedor (Docker/Railway), exportado por la imagen oficial.
+    # Con proxy_pass usando variable, el host se resuelve en tiempo de request.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=30s;
 
     # Proxy hacia el backend Spring: mantiene la misma origen y evita CORS.
     location /api/ {
         set $api_upstream ${API_UPSTREAM};
         proxy_pass $api_upstream;
+        # SNI y Host del upstream, necesarios si API_UPSTREAM es un dominio público.
+        proxy_ssl_server_name on;
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
