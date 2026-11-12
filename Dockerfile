@@ -22,6 +22,9 @@ FROM nginx:1.29-alpine
 # del servicio con la URL del backend (ej. https://backend.up.railway.app).
 ENV API_UPSTREAM=http://host.docker.internal:8080
 
+# Exporta el DNS real del contenedor para que nginx resuelva el upstream.
+ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+
 # Railway inyecta su propio PORT; este default mantiene el 80 en Docker local.
 ENV PORT=80
 
