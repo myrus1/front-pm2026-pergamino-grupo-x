@@ -18,8 +18,12 @@ RUN npm run build
 # ---------- Runtime ----------
 FROM nginx:1.29-alpine
 
-# Upstream del backend para el proxy /api (se resuelve al iniciar el contenedor).
+# Upstream del backend para el proxy /api. En Railway configurarlo como variable
+# del servicio con la URL del backend (ej. https://backend.up.railway.app).
 ENV API_UPSTREAM=http://host.docker.internal:8080
+
+# Railway inyecta su propio PORT; este default mantiene el 80 en Docker local.
+ENV PORT=80
 
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
@@ -27,4 +31,4 @@ COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
-  CMD wget -q --spider http://127.0.0.1/ || exit 1
+  CMD wget -q --spider http://127.0.0.1:${PORT}/ || exit 1

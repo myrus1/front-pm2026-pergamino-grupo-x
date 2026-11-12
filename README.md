@@ -94,8 +94,27 @@ docker run -d --name elearning-front -p 8081:80 \
 
 | Variable | Default | Descripción |
 | --- | --- | --- |
-| `API_UPSTREAM` | `http://host.docker.internal:8080` | Origen del backend para el proxy `/api`. Se resuelve al iniciar el contenedor. |
+| `API_UPSTREAM` | `http://host.docker.internal:8080` | Origen del backend para el proxy `/api`. Se resuelve en tiempo de request. |
+| `PORT` | `80` | Puerto donde escucha nginx. En Railway se toma del valor inyectado por la plataforma. |
 | `VITE_API_URL` | `/api` | Se puede sobreescribir en build con `--build-arg VITE_API_URL=...`; si se usa una URL absoluta, el backend debe habilitar CORS. |
+
+## Despliegue en Railway
+
+Railway construye con el `Dockerfile` del repositorio y ejecuta nginx en el puerto que
+inyecta en `PORT`.
+
+1. Conectá el repositorio y desplegá la rama `main`.
+2. En **Settings → Build**, verificá que el builder sea **Dockerfile**.
+3. En **Variables** del servicio del front agregá:
+
+   ```
+   API_UPSTREAM=https://<url-publica-del-backend>
+   ```
+
+   Sin `/api` al final: nginx conserva el path original (`/api/...`).
+
+No hace falta definir `VITE_API_URL` en Railway: el build ya usa `/api` por defecto, de modo
+que el navegador pega contra el mismo origen y nginx hace el proxy al backend.
 
 ## Variables de entorno
 
