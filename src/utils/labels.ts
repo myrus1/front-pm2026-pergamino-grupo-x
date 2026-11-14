@@ -18,8 +18,14 @@ export const ROLE_LABELS: Record<Role, string> = {
   STUDENT: 'Estudiante',
 }
 
-export function fullName(person: { firstName: string; lastName: string }): string {
-  return `${person.firstName} ${person.lastName}`.trim()
+export function fullName(person: {
+  firstName: string
+  lastName: string
+  email?: string
+}): string {
+  const name = `${person.firstName} ${person.lastName}`.trim()
+  // Los alumnos no tienen endpoint de perfil propio: se muestran por email.
+  return name || person.email || ''
 }
 
 export function validateEmail(email: string): boolean {

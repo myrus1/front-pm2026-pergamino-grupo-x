@@ -76,11 +76,6 @@ export function LoginPage() {
         <p className="auth-footer">
           ¿Sos estudiante y no tenés cuenta? <Link to="/register">Registrate</Link>
         </p>
-
-        <p className="hint">
-          Modo demo: el backend actual no expone autenticación. Se valida que el email pertenezca a una
-          cuenta registrada; la contraseña no se verifica.
-        </p>
       </div>
     </div>
   )

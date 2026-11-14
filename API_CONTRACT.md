@@ -7,25 +7,55 @@ Contrato **real** extraído del backend Spring ubicado en `../pm2026-pergamino-g
 - Formato: JSON. Fechas `yyyy-MM-dd` (`LocalDate`) o ISO-8601 sin zona (`LocalDateTime`).
 - Montos: `BigDecimal` serializado como número (`45000.00`).
 - Errores: `{ "mensaje": "..." }` con códigos 400, 404, 409 y 500.
-- Autenticación: **no existe un mecanismo completo**. Ver sección "Autenticación".
+- Autenticación: **JWT** con logins separados por tipo de usuario. Ver sección "Autenticación".
 
 ## Autenticación
 
-El backend **no expone** `POST /auth/login`, no usa Spring Security, no valida tokens en los
-endpoints `/api/**` y no configura CORS. El paquete `auth` es parcial: solo autentica
-instructores vía JWT.
+Hay un login por tipo de usuario, fuera del prefijo `/api`:
 
-| Método | Endpoint real | Uso en el front |
-| --- | --- | --- |
-| POST | `/instructor/auth` (fuera de `/api`) | No se usa: devuelve solo `{ token }`, sin datos del usuario, y no cubre alumnos ni administradores. |
-| POST | `/instructor` | No se usa: duplica el alta de instructores sin especialidades. |
+| Método | Endpoint | Body | Respuesta |
+| --- | --- | --- | --- |
+| POST | `/student/auth` | `{ email, password }` | `{ "token": "Bearer <jwt>" }` |
+| POST | `/instructor/auth` | `{ email, password }` | `{ "token": "Bearer <jwt>" }` |
+| POST | `/administrator/auth` | `{ email, password }` | `{ "token": "Bearer <jwt>" }` |
 
-**Modo demo del front** (`src/api/auth.ts`): busca el email ingresado en
-`GET /administrators`, `GET /instructors` y `GET /students`. El rol se deduce del origen del
-registro. No se verifica la contraseña porque el backend nunca la devuelve (está hasheada).
+El token ya incluye el prefijo `Bearer `; el front lo guarda sin ese prefijo y lo envía en
+`Authorization: Bearer <jwt>`. Vence a los 10 días.
 
-Si más adelante el backend expone `POST /auth/login` con `{ token, user }`, alcanza con definir
-`VITE_AUTH_ENDPOINT=/auth/login`; el resto del front ya usa ese contrato.
+El JWT incluye:
+
+```json
+{
+  "sub": "usuario@ejemplo.com",
+  "rol": "ALUMNO | INSTRUCTOR | ADMINISTRADOR",
+  "userId": 3,
+  "iat": 1760000000,
+  "exp": 1760864000
+}
+```
+
+**Login del front** (`src/api/auth.ts`): como no hay un endpoint unificado, se prueba
+`/student/auth`, `/instructor/auth` y `/administrator/auth` en ese orden hasta obtener un
+`200`. Si los tres devuelven `401`, las credenciales son inválidas. Luego se decodifica el
+JWT para obtener `rol`, `userId` y `sub`, y se completa el perfil:
+
+- Instructor: `GET /api/instructors/{id}` (público).
+- Administrador: `GET /api/administrators/{id}` con su token.
+- Alumno: no hay endpoint de perfil propio (`GET /api/students/{id}` es solo para
+  administradores); la UI muestra el email.
+
+**Requisito de despliegue**: Vite y nginx deben proxear las rutas exactas
+`/student/auth`, `/instructor/auth` y `/administrator/auth` (ya configurado en
+`vite.config.ts` y `nginx/default.conf.template`). No deben usar un prefijo amplio como
+`/student` para no interceptar las rutas de React.
+
+| Código | Cuándo |
+| --- | --- |
+| 400 | Falta email o contraseña |
+| 401 | Email o contraseña incorrectos |
+
+El resto de los endpoints protegidos esperan `Authorization: Bearer <jwt>` y responden
+`401` si falta el token o es inválido/vencido, y `403` si el rol no corresponde.
 
 ## Endpoints utilizados
 
@@ -92,7 +122,9 @@ una solicitud de aprobación. `GET /courses` **no** acepta `status` ni `specialt
 `StudentRequest`: `{ firstName, lastName, email, password, dni }`.
 `Student`: `{ id, firstName, lastName, email, dni }` (sin password).
 
-Usado para: registro público, listado de inscriptos de un curso (`?courseId=`) y login demo.
+Usado para: registro público y listado de inscriptos de un curso (`?courseId=`).
+El alumno logueado no puede consultar su propio perfil (`GET /students/{id}` es solo para
+administradores), por eso la UI de sesión muestra su email.
 
 ### Instructores
 
@@ -159,8 +191,8 @@ No hay cancelación ni endpoint de inscripciones por curso/alumno: el front filt
 | Código | Cuándo | Ejemplo de mensaje |
 | --- | --- | --- |
 | 400 | Datos inválidos / campos requeridos | `"El titulo no puede ser nulo"` |
-| 401 | Solo el login de instructor (`/instructor/auth`) | `"Email o contraseña incorrectos"` |
-| 403 | Token inválido en `/instructor/courses` (no usado) | `"Token invalido o vencido"` |
+| 401 | Credenciales inválidas en los logins o token ausente/vencido en endpoints protegidos | `"Email o contraseña incorrectos"` / `"Token invalido o vencido"` |
+| 403 | Token válido pero rol sin permiso o recurso ajeno | `"No tiene permisos para esta operacion"` |
 | 404 | Entidad inexistente | `"Curso no encontrado con id 99"` |
 | 409 | Email/DNI duplicado, curso lleno, no publicado, ya inscripto, etc. | `"El curso esta lleno"` |
 | 500 | Error no controlado | — |
@@ -171,7 +203,7 @@ El front muestra `mensaje` del backend cuando existe y, si no, un texto por cód
 
 | Enunciado | Backend real | Resolución en el front |
 | --- | --- | --- |
-| `POST /auth/login` | No existe | Login demo por email vía listados |
+| `POST /auth/login` | No existe: hay un login por tipo (`/student/auth`, `/instructor/auth`, `/administrator/auth`) | El front prueba los tres y deduce el rol del JWT |
 | `GET /courses?status=&specialty=` | Solo `studentId` | Filtros locales |
 | `GET /instructors/me/courses` | No existe | `GET /courses` filtrado por `instructorId` |
 | `POST /courses/{id}/approval-requests` | `POST /approval-requests` con `courseId` | Se usa el real |
