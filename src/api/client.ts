@@ -1,6 +1,7 @@
 // Por defecto se usa una ruta relativa para aprovechar el proxy de Vite (evita CORS en desarrollo).
 // El backend actual no configura CORS, por eso apuntar directo a http://localhost:8080/api
 // requiere habilitarlo del lado del servidor.
+import { stripBearer } from '../auth/jwt'
 import { SESSION_STORAGE_KEY } from '../auth/storage'
 
 const API_URL = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/+$/, '')
@@ -51,24 +52,36 @@ export function configureApi(getToken: TokenGetter, handleUnauthorized: () => vo
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown
+  /**
+   * 'api' (default) antepone VITE_API_URL. 'root' usa la ruta tal cual, necesario
+   * para los logins (/student/auth, /instructor/auth, /administrator/auth), que
+   * viven fuera de /api.
+   */
+  base?: 'api' | 'root'
+  /** Token explícito para esta request (p. ej. al hidratar el perfil antes de persistir la sesión). */
+  authToken?: string | null
+  /** Evita el logout global en un 401 (se usa al probar los endpoints de login). */
+  skipUnauthorized?: boolean
 }
 
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { body, ...init } = options
+  const { body, base = 'api', authToken, skipUnauthorized, ...init } = options
   const headers = new Headers(init.headers)
 
   if (body !== undefined && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
 
-  const token = tokenGetter()
+  const token = stripBearer(authToken !== undefined ? (authToken ?? '') : (tokenGetter() ?? ''))
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
+  const url = base === 'root' ? path : `${API_URL}${path}`
+
   let response: Response
   try {
-    response = await fetch(`${API_URL}${path}`, {
+    response = await fetch(url, {
       ...init,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -77,7 +90,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     throw new ApiError(0, 'No se pudo conectar con el servidor. Verificá que el backend esté disponible.')
   }
 
-  if (response.status === 401) {
+  if (response.status === 401 && !skipUnauthorized) {
     onUnauthorized?.()
   }
 

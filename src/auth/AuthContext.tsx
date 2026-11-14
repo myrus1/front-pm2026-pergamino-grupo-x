@@ -32,6 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const nextSession = await loginRequest(email, password)
+    // Se actualiza la ref antes del render para que cualquier request inmediata
+    // (p. ej. la página de destino al navegar) ya envíe el token nuevo.
+    sessionRef.current = nextSession
     persistSession(nextSession)
     setSession(nextSession)
     return nextSession

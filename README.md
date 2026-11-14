@@ -128,32 +128,42 @@ Copiá `.env.example` a `.env` si necesitás cambiar valores:
 | Variable | Default | Descripción |
 | --- | --- | --- |
 | `VITE_API_URL` | `/api` | Base de la API. Ruta relativa para usar el proxy de Vite. |
-| `VITE_AUTH_ENDPOINT` | *(vacío)* | Ruta de login real (ej. `/auth/login`). Si se define, se usa en lugar del modo demo. |
+
+Los logins (`/student/auth`, `/instructor/auth` y `/administrator/auth`) viven fuera de
+`/api`; Vite y nginx los proxyean con rutas exactas. El front los prueba en orden hasta
+que uno acepte las credenciales, por lo que no hace falta configurar nada adicional.
 
 Si apuntás `VITE_API_URL` directo a `http://localhost:8080/api`, el navegador bloqueará las
 requests por CORS hasta que el backend lo habilite. En producción hace falta CORS o un proxy
 inverso equivalente.
 
-## Autenticación (modo demo)
+## Autenticación
 
-El backend actual no tiene login general: no hay Spring Security, no protege `/api/**` y solo
-existe un login parcial de instructores en `POST /instructor/auth` (devuelve un JWT sin datos
-del usuario). Por eso:
+La autenticación es por JWT. El front no pregunta el tipo de usuario: al enviar email y
+contraseña prueba los tres logins del backend en orden:
 
-1. El front pide `GET /administrators`, `GET /instructors` y `GET /students`.
-2. Busca el email ingresado y deduce el rol según la tabla donde aparece.
-3. Guarda `{ token, user }` en `localStorage`.
-4. **La contraseña no se verifica** en modo demo (el backend nunca devuelve hashes).
+1. `POST /student/auth`
+2. `POST /instructor/auth`
+3. `POST /administrator/auth`
 
-Usuarios de ejemplo detectados en la base (cualquier contraseña no vacía funciona en modo demo):
+El primero que responde `200` devuelve `{ "token": "Bearer <jwt>" }` (el token ya incluye
+el prefijo). Si los tres devuelven `401`, las credenciales son inválidas.
 
-| Rol | Email |
+El JWT contiene `sub` (email), `rol` (`ALUMNO | INSTRUCTOR | ADMINISTRADOR`) y `userId`.
+Con esos claims el front arma la sesión (`STUDENT | INSTRUCTOR | ADMIN`) y completa
+nombre y apellido:
+
+| Rol | Origen del nombre |
 | --- | --- |
-| Administrador | `arothamel@comunidad.unnoba.edu.ar` |
-| Instructor | `laura.gomez@ejemplo.com` |
-| Estudiante | `ana@ejemplo.com` |
+| Instructor | `GET /api/instructors/{id}` |
+| Administrador | `GET /api/administrators/{id}` con su propio token |
+| Alumno | Sin endpoint propio: la barra muestra el email |
 
-El registro público de estudiantes (`POST /students`) sí crea la cuenta real y luego inicia
+El token se guarda **sin** el prefijo `Bearer` en `localStorage` (clave
+`elearning.session.v2`) y se adjunta como `Authorization: Bearer <jwt>` en cada request.
+Si el backend responde `401`, la sesión se limpia y se redirige al login.
+
+El registro público de estudiantes (`POST /students`) crea la cuenta real y luego inicia
 sesión automáticamente.
 
 ## Estructura
@@ -162,7 +172,7 @@ sesión automáticamente.
 src/
 ├── api/            # cliente fetch + una función por recurso
 │   ├── client.ts   # wrapper, token, errores y mapeo de status
-│   ├── auth.ts     # login (demo o VITE_AUTH_ENDPOINT)
+│   ├── auth.ts     # login: prueba los 3 endpoints y decodifica el JWT
 │   ├── courses.ts
 │   ├── enrollments.ts
 │   ├── approvals.ts
@@ -224,8 +234,10 @@ src/
 
 Documentadas en detalle en [`API_CONTRACT.md`](./API_CONTRACT.md). Resumen:
 
-1. **Sin autenticación real**: el login es demo por email; no se valida contraseña. Si el backend
-   agrega `POST /auth/login`, definir `VITE_AUTH_ENDPOINT`.
+1. **Autenticación JWT**: el front prueba los tres logins (`/student/auth`,
+   `/instructor/auth`, `/administrator/auth`) y deduce el rol del token. El perfil del alumno
+   no está expuesto: `GET /api/students/{id}` es solo para administradores, por lo que la
+   barra muestra su email.
 2. **Sin CORS**: se resuelve con proxy de Vite en desarrollo; producción requiere CORS/proxy.
 3. **Especialidades del instructor no expuestas**: el formulario de curso muestra todas las
    especialidades y el backend rechaza si no pertenece al instructor.
