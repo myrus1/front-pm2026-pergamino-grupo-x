@@ -7,7 +7,7 @@ import { SESSION_STORAGE_KEY } from '../auth/storage'
 const API_URL = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/+$/, '')
 
 /** Lee el token de la sesión persistida para no depender del orden de montaje de React. */
-function readSessionToken(): string | null {
+export function readSessionToken(): string | null {
   try {
     const raw = localStorage.getItem(SESSION_STORAGE_KEY)
     if (!raw) {

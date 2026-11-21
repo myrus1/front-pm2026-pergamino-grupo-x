@@ -13,6 +13,11 @@ COPY . .
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=${VITE_API_URL}
 
+# URL pública del servicio del asistente de voz. Vite la incrusta en el build: sin ella el
+# botón de voz no aparece. En Railway, cargarla como variable del servicio del front.
+ARG VITE_ASISTENTE_URL=
+ENV VITE_ASISTENTE_URL=${VITE_ASISTENTE_URL}
+
 RUN npm run build
 
 # ---------- Runtime ----------
