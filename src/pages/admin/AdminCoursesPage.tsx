@@ -1,3 +1,4 @@
+import { CourseLabel } from '../../components/CourseLabel'
 import { useMemo, useState } from 'react'
 import { deleteCourse, getCourses } from '../../api/courses'
 import { getInstructors } from '../../api/instructors'
@@ -109,7 +110,9 @@ export function AdminCoursesPage() {
             <tbody>
               {courses.map((course) => (
                 <tr key={course.id}>
-                  <td>{course.title}</td>
+                  <td>
+                    <CourseLabel id={course.id} title={course.title} />
+                  </td>
                   <td>{specialtyMap.get(course.specialtyId ?? 0) ?? '—'}</td>
                   <td>{instructorMap.get(course.instructorId ?? 0) ?? '—'}</td>
                   <td>

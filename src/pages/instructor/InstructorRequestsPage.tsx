@@ -1,3 +1,4 @@
+import { CourseLabel } from '../../components/CourseLabel'
 import { useMemo } from 'react'
 import { getApprovalRequests } from '../../api/approvals'
 import { getCourses } from '../../api/courses'
@@ -60,7 +61,12 @@ export function InstructorRequestsPage() {
             <tbody>
               {requests.map((request) => (
                 <tr key={request.id}>
-                  <td>{courseMap.get(request.courseId)?.title ?? `Curso #${request.courseId}`}</td>
+                  <td>
+                    <CourseLabel
+                      id={request.courseId}
+                      title={courseMap.get(request.courseId)?.title ?? `Curso #${request.courseId}`}
+                    />
+                  </td>
                   <td>{formatDateTime(request.requestDate)}</td>
                   <td>{formatDateTime(request.resolutionDate)}</td>
                   <td>

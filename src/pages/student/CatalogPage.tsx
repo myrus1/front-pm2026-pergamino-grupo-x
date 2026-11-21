@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getCourses } from '../../api/courses'
 import { getEnrollments } from '../../api/enrollments'
 import { getInstructors } from '../../api/instructors'
 import { getSpecialties } from '../../api/specialties'
+import { Bookshelf } from '../../components/Bookshelf'
+import { FeaturedReleases } from '../../components/FeaturedReleases'
 import { EmptyState, ErrorState, LoadingState } from '../../components/States'
 import { formatCurrency, formatDate, isTodayOrPast } from '../../utils/format'
 import { fullName } from '../../utils/labels'
@@ -65,11 +66,36 @@ export function CatalogPage() {
     return <ErrorState message={resource.error} onRetry={resource.reload} />
   }
 
+  const describe = (course: (typeof visibleCourses)[number]) => {
+    const count = enrollmentCounts.get(course.id) ?? 0
+    const spots = Math.max(course.maxCapacity - count, 0)
+    const started = isTodayOrPast(course.startDate)
+    return { spots, started }
+  }
+
+  const featured = (data?.courses ?? [])
+    .filter((course) => course.status === 'PUBLISHED' && !isTodayOrPast(course.startDate))
+    .sort((first, second) => first.startDate.localeCompare(second.startDate))
+    .slice(0, 6)
+
   return (
     <section>
+      {featured.length > 1 && (
+        <FeaturedReleases
+          items={featured.map((course) => ({
+            id: course.id,
+            title: course.title,
+            kicker: specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad',
+            byline: instructorMap.get(course.instructorId ?? 0),
+            meta: `Empieza el ${formatDate(course.startDate)}`,
+            to: `/student/courses/${course.id}`,
+          }))}
+        />
+      )}
+
       <header className="page-header">
         <div>
-          <h1>Catálogo de cursos</h1>
+          <h1>Catálogo</h1>
           <p className="muted">Cursos publicados disponibles para inscribirse.</p>
         </div>
         <span className="count-pill">
@@ -84,7 +110,7 @@ export function CatalogPage() {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Ej. React avanzado"
+            placeholder="Ej. Bases de datos"
           />
         </label>
         <label className="field">
@@ -103,44 +129,40 @@ export function CatalogPage() {
       {visibleCourses.length === 0 ? (
         <EmptyState message="No hay cursos que coincidan con los filtros." />
       ) : (
-        <div className="card-grid">
-          {visibleCourses.map((course) => {
-            const count = enrollmentCounts.get(course.id) ?? 0
-            const spots = Math.max(course.maxCapacity - count, 0)
-            const started = isTodayOrPast(course.startDate)
-            return (
-              <Link
-                key={course.id}
-                className="course-card"
-                to={`/student/courses/${course.id}`}
-                aria-label={`Ver detalle de ${course.title}`}
-              >
-                <div className="course-card__top">
-                  <span
-                    className="tag"
-                    title={specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad'}
-                  >
-                    {specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad'}
-                  </span>
-                  <span className={`badge ${spots === 0 || started ? 'badge--muted' : 'badge--success'}`}>
-                    {started ? 'Comenzado' : spots === 0 ? 'Sin cupo' : `${spots} cupos`}
-                  </span>
-                </div>
-                <h2>{course.title}</h2>
-                <p className="course-card__instructor">
-                  Instructor: {instructorMap.get(course.instructorId ?? 0) ?? '—'}
-                </p>
-                <p className="muted course-card__date">
-                  {formatDate(course.startDate)} – {formatDate(course.endDate)}
-                </p>
-                <div className="course-card__footer">
-                  <strong>{formatCurrency(course.basePrice)}</strong>
-                  <span className="course-card__cta">Ver detalle</span>
-                </div>
-              </Link>
-            )
+        <Bookshelf
+          items={visibleCourses.map((course) => {
+            const { spots, started } = describe(course)
+            return {
+              id: course.id,
+              title: course.title,
+              kicker: specialtyMap.get(course.specialtyId ?? 0) ?? 'Sin especialidad',
+              byline: instructorMap.get(course.instructorId ?? 0),
+              to: `/student/courses/${course.id}`,
+              details: (
+                <dl className="shelf__facts">
+                  <div>
+                    <dt>Fechas</dt>
+                    <dd>
+                      {formatDate(course.startDate)} – {formatDate(course.endDate)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Precio</dt>
+                    <dd>{formatCurrency(course.basePrice)}</dd>
+                  </div>
+                  <div>
+                    <dt>Cupo</dt>
+                    <dd>
+                      <span className={`badge ${spots === 0 || started ? 'badge--muted' : 'badge--success'}`}>
+                        {started ? 'Comenzado' : spots === 0 ? 'Sin cupo' : `${spots} cupos`}
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              ),
+            }
           })}
-        </div>
+        />
       )}
     </section>
   )

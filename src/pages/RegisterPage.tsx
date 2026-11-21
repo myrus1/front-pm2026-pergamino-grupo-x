@@ -1,3 +1,4 @@
+import { Landscape } from '../components/CourseCover'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
@@ -99,6 +100,9 @@ export function RegisterPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-art" aria-hidden="true">
+        <Landscape seed={1} />
+      </div>
       <div className="auth-card">
         <h1>Registro de estudiante</h1>
         <p className="muted">Creá tu cuenta para inscribirte a los cursos.</p>

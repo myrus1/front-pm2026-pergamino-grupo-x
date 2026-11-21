@@ -1,3 +1,4 @@
+import { CourseCover } from '../../components/CourseCover'
 import { useMemo, useState } from 'react'
 import { approveApprovalRequest, getApprovalRequests, rejectApprovalRequest } from '../../api/approvals'
 import { getCourses } from '../../api/courses'
@@ -93,7 +94,8 @@ export function AdminApprovalsPage() {
             return (
               <article key={request.id} className="panel">
                 <header className="panel__header">
-                  <div>
+                  <CourseCover variant="thumb" seed={request.courseId} title={course?.title ?? ''} />
+                  <div className="panel__heading">
                     <h2>{course?.title ?? `Curso #${request.courseId}`}</h2>
                     <p className="muted">
                       Solicitud enviada el {formatDateTime(request.requestDate)}
