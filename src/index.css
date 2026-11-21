@@ -81,12 +81,24 @@
 body {
   margin: 0;
   min-height: 100vh;
+  background: var(--paper);
+  font-size: 1rem;
+}
+
+/*
+ * Luz de fondo fija. Va en una capa propia en vez de background-attachment: fixed,
+ * que obliga a redibujar toda la pantalla en cada cuadro de scroll (sobre todo en Safari).
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(ellipse 90% 55% at 50% -12%, #232219 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 100% 100%, #17160f 0%, transparent 70%),
-    var(--paper);
-  background-attachment: fixed;
-  font-size: 1rem;
+    radial-gradient(ellipse 60% 40% at 100% 100%, #17160f 0%, transparent 70%);
+  transform: translateZ(0);
 }
 
 /*
@@ -100,6 +112,7 @@ body::after {
   z-index: 200;
   pointer-events: none;
   opacity: 0.06;
+  transform: translateZ(0);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -218,9 +231,9 @@ code {
 }
 
 /* ---------- Barra superior ---------- */
+/* Sin backdrop-filter: el blur se recalculaba en cada cuadro de scroll. */
 .navbar {
-  background: rgb(14 14 12 / 82%);
-  backdrop-filter: blur(10px);
+  background: rgb(14 14 12 / 96%);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -835,6 +848,7 @@ textarea[aria-invalid='true']:focus {
   transform-style: preserve-3d;
   transform: rotateY(-26deg) rotateX(4deg);
   animation: book-sway 9s ease-in-out infinite;
+  will-change: transform;
 }
 
 .book .cover {
@@ -1941,30 +1955,11 @@ html {
 
 /* ---------- Portadas vivas ---------- */
 
-/* El sol de cada portada sube y baja despacio, cada uno a su ritmo. */
-.cover .art-sun {
-  animation: sun-drift 13s ease-in-out infinite alternate;
-}
-
-.card-grid > :nth-child(3n + 2) .art-sun {
-  animation-duration: 17s;
-  animation-delay: -6s;
-}
-
-.card-grid > :nth-child(3n) .art-sun {
-  animation-duration: 11s;
-  animation-delay: -9s;
-}
-
-@keyframes sun-drift {
-  from {
-    transform: translateY(7px);
-  }
-
-  to {
-    transform: translateY(-9px);
-  }
-}
+/*
+ * El sol de las portadas ya no se mueve solo: con decenas de portadas, la animación
+ * obligaba a redibujar cada SVG en cada cuadro y el scroll iba lento en Safari y Windows.
+ * Se sigue moviendo con el hover (más abajo).
+ */
 
 /* Con hover: las lomas se corren (paralaje) y los surcos se vuelven a dibujar. */
 .cover .art-land,
@@ -2108,6 +2103,8 @@ html {
 .featured__backdrop {
   position: absolute;
   inset: 0;
+  /* Capa propia: el fundido del scroll cambia la opacidad sin redibujar el paisaje. */
+  will-change: opacity;
 }
 
 .featured__backdrop .landscape {

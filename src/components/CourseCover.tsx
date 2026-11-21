@@ -47,23 +47,16 @@ function CoverArt({ seed, align = 'xMidYMid' }: { seed: number; align?: string }
 
   // Los ids de los filtros tienen que ser únicos en la página.
   const uid = useId().replace(/:/g, '')
-  const brush = `brush-${uid}`
-  const grain = `grain-${uid}`
   const sky = `sky-${uid}`
 
   return (
     <svg className="cover__art" viewBox="0 0 300 400" preserveAspectRatio={`${align} slice`} aria-hidden="true">
+      {/*
+        Sin filtros SVG (feTurbulence): en Safari y en PCs sin mucha GPU se recalculaban en
+        cada cuadro de scroll, en cada portada, y la página iba en cámara lenta. El grano lo
+        pone la textura fija de toda la app (body::after).
+      */}
       <defs>
-        {/* Borde de pincel: desplaza apenas los contornos con ruido. */}
-        <filter id={brush} x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.035 0.09" numOctaves="3" seed={seed % 97} />
-          <feDisplacementMap in="SourceGraphic" scale="9" />
-        </filter>
-        {/* Grano de impresión. */}
-        <filter id={grain}>
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
-          <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0" />
-        </filter>
         <linearGradient id={sky} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={ink} stopOpacity="0" />
           <stop offset="1" stopColor={ink} stopOpacity="0.14" />
@@ -75,11 +68,10 @@ function CoverArt({ seed, align = 'xMidYMid' }: { seed: number; align?: string }
       ) : (
         <circle className="art-sun" cx={sunX} cy={sunY} r={sunR} fill={ink} fillOpacity="0.2" />
       )}
-      <g className="art-land" filter={`url(#${brush})`}>
+      <g className="art-land">
         <path d={hillPath(random, horizon - 10, 46)} fill={ink} fillOpacity="0.1" />
         <path d={hillPath(random, horizon + 12, 30)} fill={ink} fillOpacity="0.16" />
       </g>
-      <rect width="300" height="400" filter={`url(#${grain})`} opacity="0.22" style={{ mixBlendMode: 'overlay' }} />
       <g className="art-furrows" stroke={ink} strokeOpacity="0.3" strokeWidth="1">
         {Array.from({ length: furrows }, (_, index) => {
           const x = -120 + (index * 540) / (furrows - 1)
