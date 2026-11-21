@@ -6,6 +6,8 @@ import { getInstructors } from '../../api/instructors'
 import { getSpecialties } from '../../api/specialties'
 import { useAuth } from '../../auth/useAuth'
 import { useToast } from '../../components/useToast'
+import { BookStage } from '../../components/BookStage'
+import { CourseCover } from '../../components/CourseCover'
 import { CourseStatusBadge } from '../../components/StatusBadge'
 import { ErrorState, LoadingState } from '../../components/States'
 import { getEnrollmentEligibility } from '../../utils/enrollment'
@@ -111,6 +113,15 @@ export function CourseDetailPage() {
 
       <div className="detail-layout">
         <article className="panel">
+          <BookStage>
+            <CourseCover
+              variant="book"
+              seed={course.id}
+              title={course.title}
+              kicker={specialty?.name ?? 'Sin especialidad'}
+              byline={instructor ? fullName(instructor) : undefined}
+            />
+          </BookStage>
           <div className="detail-title">
             <h1>{course.title}</h1>
             <CourseStatusBadge status={course.status} />

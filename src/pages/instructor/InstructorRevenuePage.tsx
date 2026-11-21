@@ -1,3 +1,4 @@
+import { CourseLabel } from '../../components/CourseLabel'
 import { useMemo } from 'react'
 import { getCourses } from '../../api/courses'
 import { getEnrollments } from '../../api/enrollments'
@@ -95,7 +96,9 @@ export function InstructorRevenuePage() {
             <tbody>
               {breakdown.map((item) => (
                 <tr key={item.course.id}>
-                  <td>{item.course.title}</td>
+                  <td>
+                    <CourseLabel id={item.course.id} title={item.course.title} />
+                  </td>
                   <td className="cell-number">{item.count}</td>
                   <td className="cell-number">{formatCurrency(item.estimated)}</td>
                 </tr>

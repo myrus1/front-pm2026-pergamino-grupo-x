@@ -1,3 +1,4 @@
+import { CourseLabel } from '../../components/CourseLabel'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getCourses } from '../../api/courses'
@@ -69,7 +70,9 @@ export function MyCoursesPage() {
                   <tr key={enrollment.id}>
                     <td>
                       {course ? (
-                        <Link to={`/student/courses/${course.id}`}>{course.title}</Link>
+                        <CourseLabel id={course.id} title={course.title}>
+                          <Link to={`/student/courses/${course.id}`}>{course.title}</Link>
+                        </CourseLabel>
                       ) : (
                         `Curso #${enrollment.courseId}`
                       )}

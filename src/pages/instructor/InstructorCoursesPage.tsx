@@ -1,3 +1,4 @@
+import { CourseLabel } from '../../components/CourseLabel'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteCourse, getCourses } from '../../api/courses'
@@ -109,7 +110,9 @@ export function InstructorCoursesPage() {
             <tbody>
               {myCourses.map((course) => (
                 <tr key={course.id}>
-                  <td>{course.title}</td>
+                  <td>
+                    <CourseLabel id={course.id} title={course.title} />
+                  </td>
                   <td>{specialtyMap.get(course.specialtyId ?? 0) ?? '—'}</td>
                   <td>
                     {formatDate(course.startDate)} – {formatDate(course.endDate)}

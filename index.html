@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#2557d6" />
-    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#0e0e0c" />
+    <meta name="color-scheme" content="dark" />
     <meta
       name="description"
       content="EduPlatform: catálogo de cursos, inscripciones y gestión académica para estudiantes, instructores y administradores."
@@ -15,10 +15,22 @@
       property="og:description"
       content="Catálogo de cursos, inscripciones y gestión académica en un solo lugar."
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>EduPlatform · Gestión de cursos</title>
   </head>
   <body>
+    <!-- Fondo animado: luz que cruza el cielo y surcos que avanzan. Decorativo. -->
+    <div class="ambient" aria-hidden="true">
+      <div class="ambient__glow"></div>
+      <div class="ambient__glow ambient__glow--low"></div>
+      <div class="ambient__field"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -1,3 +1,4 @@
+import { CourseCover } from '../../components/CourseCover'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { createCourse, getCourse, updateCourse } from '../../api/courses'
@@ -79,6 +80,15 @@ interface CourseFormProps {
   }
 }
 
+// Mientras el curso no existe, la portada de prueba sale del título.
+function titleSeed(title: string): number {
+  let hash = 0
+  for (const char of title) {
+    hash = (hash * 31 + char.charCodeAt(0)) | 0
+  }
+  return Math.abs(hash)
+}
+
 function CourseForm({ specialties, initial }: CourseFormProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -132,6 +142,7 @@ function CourseForm({ specialties, initial }: CourseFormProps) {
   }
 
   return (
+    <div className="form-layout">
     <form className="panel form form--narrow" onSubmit={handleSubmit} noValidate>
       <label className="field">
         <span className="field__label">Título</span>
@@ -241,6 +252,16 @@ function CourseForm({ specialties, initial }: CourseFormProps) {
         </button>
       </div>
     </form>
+      <aside className="form-preview" aria-label="Vista previa de la portada">
+        <CourseCover
+          variant="book"
+          seed={initial?.id ?? titleSeed(form.title)}
+          title={form.title.trim() || 'Título del curso'}
+          kicker={specialties.find((item) => String(item.id) === form.specialtyId)?.name ?? 'Especialidad'}
+        />
+        {!initial && <p className="muted">La portada definitiva se genera cuando se crea el curso.</p>}
+      </aside>
+    </div>
   )
 }
 

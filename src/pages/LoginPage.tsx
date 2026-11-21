@@ -1,3 +1,4 @@
+import { Landscape } from '../components/CourseCover'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
@@ -45,6 +46,9 @@ export function LoginPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-art" aria-hidden="true">
+        <Landscape seed={3} />
+      </div>
       <div className="auth-card">
         <h1>Iniciar sesión</h1>
         <p className="muted">Plataforma de gestión de cursos</p>

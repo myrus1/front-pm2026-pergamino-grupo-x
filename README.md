@@ -99,6 +99,7 @@ docker run -d --name elearning-front -p 8081:80 \
 | `API_UPSTREAM` | `http://host.docker.internal:8080` | Origen del backend para el proxy `/api`. Se resuelve en tiempo de request. |
 | `PORT` | `80` | Puerto donde escucha nginx. En Railway se toma del valor inyectado por la plataforma. |
 | `VITE_API_URL` | `/api` | Se puede sobreescribir en build con `--build-arg VITE_API_URL=...`; si se usa una URL absoluta, el origen del front tiene que estar en `CORS_ALLOWED_ORIGINS` del backend. |
+| `VITE_ASISTENTE_URL` | _(vacío)_ | URL pública del asistente de voz (ej. `https://asistente.up.railway.app`, sin barra final). Es de build: `--build-arg VITE_ASISTENTE_URL=...`. Vacía, el botón de voz no aparece. |
 
 ## Despliegue en Railway
 
@@ -123,6 +124,11 @@ inyecta en `PORT`.
 No hace falta definir `VITE_API_URL` en Railway: el build ya usa `/api` por defecto, de modo
 que el navegador pega contra el mismo origen y nginx hace el proxy al backend.
 
+Para mostrar el asistente de voz, agregá en **Variables** del front `VITE_ASISTENTE_URL` con
+la URL pública del servicio del asistente (`https://...`, sin barra final). Railway se la pasa
+al build por el `ARG` del `Dockerfile`; como Vite la incrusta al compilar, cambiarla exige
+redesplegar el front. En el asistente, `ALLOWED_ORIGINS` tiene que ser el origen exacto del front.
+
 ## Variables de entorno
 
 Copiá `.env.example` a `.env` si necesitás cambiar valores:
@@ -130,6 +136,7 @@ Copiá `.env.example` a `.env` si necesitás cambiar valores:
 | Variable | Default | Descripción |
 | --- | --- | --- |
 | `VITE_API_URL` | `/api` | Base de la API. Ruta relativa para usar el proxy de Vite. |
+| `VITE_ASISTENTE_URL` | _(vacío)_ | URL del servicio del asistente de voz (ej. `http://localhost:8000`). Vacía, no se muestra el botón de voz. |
 
 El login único (`/api/auth/token`) va por el proxy de `/api`. Los logins viejos
 (`/student/auth`, `/instructor/auth` y `/administrator/auth`) viven fuera de `/api`; Vite y

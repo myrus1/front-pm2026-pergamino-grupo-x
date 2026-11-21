@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { ROLE_LABELS, fullName } from '../utils/labels'
 import type { Role } from '../types/domain'
+import { BotonVoz } from '../voice/BotonVoz'
 
 interface NavItem {
   to: string
@@ -30,6 +32,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
 export function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [refrescos, setRefrescos] = useState(0)
 
   const handleLogout = () => {
     logout()
@@ -81,8 +84,10 @@ export function Layout() {
       </header>
 
       <main className="page" id="main-content" tabIndex={-1}>
-        <Outlet />
+        <Outlet key={refrescos} />
       </main>
+
+      <BotonVoz key={user?.id ?? 'anon'} alCambiar={() => setRefrescos((n) => n + 1)} />
     </div>
   )
 }
